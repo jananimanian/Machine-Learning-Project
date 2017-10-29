@@ -60,7 +60,7 @@ for f in train.columns:
         'role': role,
         'level': level,
         'keep': keep,
-        'dtype': dtype
+        'dtype': np.dtype
     }
     data.append(f_dict)
     
@@ -71,7 +71,20 @@ print(meta);
 print(meta[(meta.level == 'nominal') & (meta.keep)].index);
 
 print(pd.DataFrame({'count' : meta.groupby(['role', 'level'])['role'].size()}).reset_index());
+#print(pd.DataFrame({'count' : meta.groupby(['varname'])}).reset_index());
 
 v = meta[(meta.level == 'interval') & (meta.keep)].index;
-train[v].describe()
+print("\n interval data");
+print(train[v].describe())
 
+v = meta[(meta.level == 'ordinal') & (meta.keep)].index
+print("\n ordinal data");
+print(train[v].describe())
+
+v = meta[(meta.level == 'nominal') & (meta.keep)].index
+print("\n nominal data");
+print(train[v].describe())
+
+v = meta[(meta.level == 'binary') & (meta.keep)].index
+print("\n binary data");
+print(train[v].describe())
