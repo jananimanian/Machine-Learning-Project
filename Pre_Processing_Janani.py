@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 pd.set_option('display.max_columns', 100)
 
 train = pd.read_csv('F:/Fall_2017/ML/train.csv')
-test = pd.read_csv('F:/Fall_2017/ML/train.csv')
+test = pd.read_csv('F:/Fall_2017/ML/test.csv')
 
 print(train.head());
 
@@ -226,3 +226,90 @@ for f in v:
     plt.xlabel(f, fontsize=18)
     plt.tick_params(axis='both', which='major', labelsize=18)
     plt.show();
+
+def corr_heatmap(v):
+    correlations = train[v].corr()
+
+    # Create color map ranging between two colors
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    fig, ax = plt.subplots(figsize=(10,10))
+    sns.heatmap(correlations, cmap=cmap, vmax=1.0, center=0, fmt='.2f',
+                square=True, linewidths=.5, annot=True, cbar_kws={"shrink": .75})
+    plt.show();
+    
+v = meta[(meta.level == 'interval') & (meta.keep)].index
+corr_heatmap(v) 
+
+s = train.sample(frac=0.1)
+
+sns.lmplot(x='ps_reg_02', y='ps_reg_03', data=s, hue='target', palette='Set1', scatter_kws={'alpha':0.3})
+plt.show()
+
+
+sns.lmplot(x='ps_car_12', y='ps_car_13', data=s, hue='target', palette='Set1', scatter_kws={'alpha':0.3})
+plt.show()
+
+sns.lmplot(x='ps_car_12', y='ps_car_14', data=s, hue='target', palette='Set1', scatter_kws={'alpha':0.3})
+plt.show()
+
+
+sns.lmplot(x='ps_car_15', y='ps_car_13', data=s, hue='target', palette='Set1', scatter_kws={'alpha':0.3})
+plt.show()
+
+v = meta[(meta.level == 'ordinal') & (meta.keep)].index
+corr_heatmap(v) 
+
+
+v = meta[(meta.level == 'nominal') & (meta.keep)].index
+print('Before dummification we have {} variables in train'.format(train.shape[1]))
+train = pd.get_dummies(train, columns=v, drop_first=True)
+print('After dummification we have {} variables in train'.format(train.shape[1]))
+
+
+v = meta[(meta.level == 'interval') & (meta.keep)].index
+poly = PolynomialFeatures(degree=2, interaction_only=False, include_bias=False)
+interactions = pd.DataFrame(data=poly.fit_transform(train[v]), columns=poly.get_feature_names(v))
+interactions.drop(v, axis=1, inplace=True)  # Remove the original columns
+# Concat the interaction variables to the train data
+print('Before creating interactions we have {} variables in train'.format(train.shape[1]))
+train = pd.concat([train, interactions], axis=1)
+print('After creating interactions we have {} variables in train'.format(train.shape[1]))
+
+selector = VarianceThreshold(threshold=.01)
+selector.fit(train.drop(['id', 'target'], axis=1)) # Fit to train without id and target variables
+
+f = np.vectorize(lambda x : not x) # Function to toggle boolean array elements
+
+v = train.drop(['id', 'target'], axis=1).columns[f(selector.get_support())]
+print('{} variables have too low variance.'.format(len(v)))
+print('These variables are {}'.format(list(v)))
+
+
+X_train = train.drop(['id', 'target'], axis=1)
+y_train = train['target']
+
+feat_labels = X_train.columns
+
+rf = RandomForestClassifier(n_estimators=1000, random_state=0, n_jobs=-1)
+
+rf.fit(X_train, y_train)
+importances = rf.feature_importances_
+
+indices = np.argsort(rf.feature_importances_)[::-1]
+
+for f in range(X_train.shape[1]):
+    print("%2d) %-*s %f" % (f + 1, 30,feat_labels[indices[f]], importances[indices[f]]))
+        
+        
+sfm = SelectFromModel(rf, threshold='median', prefit=True)
+print('Number of features before selection: {}'.format(X_train.shape[1]))
+n_features = sfm.transform(X_train).shape[1]
+print('Number of features after selection: {}'.format(n_features))
+selected_vars = list(feat_labels[sfm.get_support()])
+
+train = train[selected_vars + ['target']]
+
+
+scaler = StandardScaler()
+scaler.fit_transform(train.drop(['target'], axis=1))
