@@ -42,7 +42,8 @@ from sklearn.metrics import recall_score
 #model = RandomForestClassifier(n_estimators=10)
 
 train_master = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/train.csv',na_values='-1')
-test_master = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/test.csv',na_values='-1')
+test_master = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/test_porto.csv',na_values='-1')
+test_result = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/test_porto_result.csv',na_values='-1')
 
 binary_columns = [s for s in list(train_master.columns.values) if '_bin' in s]
 categorical_columns = [s for s in list(train_master.columns.values) if '_cat' in s]
@@ -339,16 +340,35 @@ for ind in range(1,4):
         print('\nPredicted accuracy clf 2: ', accuracy_score(y_val,y_pred_RF_class2))
         print('\nPredicted accuracy clf 3: ', accuracy_score(y_val,y_pred_RF_class3))
         
-        ## CONFUSION MATRIX
-        RF_cm1=metrics.confusion_matrix(y_val,y_pred_RF_class1)
-        RF_cm2=metrics.confusion_matrix(y_val,y_pred_RF_class2)
-        RF_cm3=metrics.confusion_matrix(y_val,y_pred_RF_class3)
-        print(RF_cm1)
-        print(RF_cm2)
-        print(RF_cm3)
+#        ## CONFUSION MATRIX
+#        RF_cm1=metrics.confusion_matrix(y_val,y_pred_RF_class1)
+#        RF_cm2=metrics.confusion_matrix(y_val,y_pred_RF_class2)
+#        RF_cm3=metrics.confusion_matrix(y_val,y_pred_RF_class3)
+#        print(RF_cm1)
+#        print(RF_cm2)
+#        print(RF_cm3)
         
         print("Logistc Regression F1-Measure is: %.3f \n" %((f1_score(y_val,y_pred_RF_class3, average='macro'))))
         print("Logistc Regression Recall Score is: %.3f \n" %((recall_score(y_val,y_pred_RF_class3, average='macro'))))
+        
+        
+        print('RF Score clf 1 Validation: ', metrics.accuracy_score(y_val, y_pred_RF_class1))
+        print('RF Score clf 2 Validation: ', metrics.accuracy_score(y_val, y_pred_RF_class2))
+        print('RF Score clf 3 Validation: ', metrics.accuracy_score(y_val, y_pred_RF_class3))
+        
+        print('RF Score clf 1 Test: ', metrics.accuracy_score(test_result['target'], test_pred_RF_class1))
+        print('RF Score clf 2 Test: ', metrics.accuracy_score(test_result['target'], test_pred_RF_class2))
+        print('RF Score clf 3 Test: ', metrics.accuracy_score(test_result['target'], test_pred_RF_class3))
+        
+#        ## CONFUSION MATRIX VALIDATION
+#        print('Confusion Matrix clf 1 Validation: ',metrics.confusion_matrix(y_val, y_pred_RF_class1))
+#        print('Confusion Matrix clf 2 Validation: ',metrics.confusion_matrix(y_val, y_pred_RF_class2))
+#        print('Confusion Matrix clf 3 Validation: ',metrics.confusion_matrix(y_val, y_pred_RF_class3))
+#        
+#        ## CONFUSION MATRIX TEST
+#        print('Confusion Matrix clf 1 Test: ',metrics.confusion_matrix(test_result['target'],test_pred_class1))
+#        print('Confusion Matrix clf 2 Test: ',metrics.confusion_matrix(test_result['target'],test_pred_class2))
+#        print('Confusion Matrix clf 3 Test: ',metrics.confusion_matrix(test_result['target'],test_pred_class3))
     
     fold_counter=0
     
