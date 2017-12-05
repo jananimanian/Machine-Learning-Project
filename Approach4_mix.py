@@ -36,8 +36,8 @@ from sklearn.ensemble import RandomForestClassifier
 #model = RandomForestClassifier(n_estimators=10)
 
 train_master = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/train.csv',na_values='-1')
-test_master = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/test.csv',na_values='-1')
-
+test_master = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/test_porto.csv',na_values='-1')
+test_result = pd.read_csv('C:/Users/Sindhuja/Desktop/ML Project/test_porto_result.csv',na_values='-1')
 binary_columns = [s for s in list(train_master.columns.values) if '_bin' in s]
 categorical_columns = [s for s in list(train_master.columns.values) if '_cat' in s]
 non_continuous_feature_subs = ['_cat', '_bin', 'target', 'id']
@@ -353,6 +353,7 @@ for train_ids, val_ids in folds.split(train.drop(['id',target_column], axis=1),t
     RF_model_cat2.fit(X_train, y)
     RF_model_cat3.fit(X_train, y)
     
+    
     test_pred_class1 = RF_model_cat1.predict(X_test_std)
     test_pred_class2 = RF_model_cat2.predict(X_test_std)
     test_pred_class3 = RF_model_cat3.predict(X_test_std)
@@ -387,18 +388,13 @@ for train_ids, val_ids in folds.split(train.drop(['id',target_column], axis=1),t
     x_val_fold[val_ids] = (RF_model_cat1.predict(X_val_std) + RF_model_cat2.predict(X_val_std) + RF_model_cat3.predict(X_val_std))/3;
     X_val_std
     
-    print('RF Score clf 1: ', metrics.accuracy_score(y_val, y_pred_RF_class1))
-    print('RF Score clf 2: ', metrics.accuracy_score(y_val, y_pred_RF_class2))
-    print('RF Score clf 3: ', metrics.accuracy_score(y_val, y_pred_RF_class3))
+    print('RF Score clf 1 Validation: ', metrics.accuracy_score(y_val, y_pred_RF_class1))
+    print('RF Score clf 2 Validation: ', metrics.accuracy_score(y_val, y_pred_RF_class2))
+    print('RF Score clf 3 Validation: ', metrics.accuracy_score(y_val, y_pred_RF_class3))
     
-    ## CONFUSION MATRIX
-    RF_cm1=metrics.confusion_matrix(y_val,y_pred_RF_class1)
-    RF_cm2=metrics.confusion_matrix(y_val,y_pred_RF_class2)
-    RF_cm3=metrics.confusion_matrix(y_val,y_pred_RF_class3)
-    print(RF_cm1)
-    print(RF_cm2)
-    print(RF_cm3)
-    
+    print('RF Score clf 1 Test: ', metrics.accuracy_score(test_result['target'], test_pred_class1))
+    print('RF Score clf 2 Test: ', metrics.accuracy_score(test_result['target'], test_pred_class2))
+    print('RF Score clf 3 Test: ', metrics.accuracy_score(test_result['target'], test_pred_class3))
     
     
 
